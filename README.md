@@ -1,16 +1,27 @@
-# dockerfile-risk-scan
+<img src="assets/readme-cover.svg" alt="Dockerfile Risk Scan cover" width="100%" />
 
-**Runbook.** Scan Dockerfile snippets for root users, latest tags, and unpinned installs.
+# Dockerfile Risk Scan
 
-## Prerequisites
+Scan Dockerfile snippets for root users, latest tags, and unpinned installs.
 
-Container risks often start in simple Dockerfile shortcuts. This CLI catches common issues before image builds ship.
+![stack](https://img.shields.io/badge/stack-Python-dc2626?style=flat-square) ![python](https://img.shields.io/badge/python-3.11-7c3aed?style=flat-square) ![license](https://img.shields.io/badge/license-MIT-0891b2?style=flat-square) ![ci](https://img.shields.io/badge/ci-GitHub%20Actions-b45309?style=flat-square)
 
-## Procedure
+## Workflow
 
-`dockerfile-risk-scan` accepts Dockerfile or container build notes in text, JSON, JSONL, or CSV form.
+1. Collect the review notes or exported records.
+2. Run `dockerfile-risk-scan` against the file.
+3. Read the findings in Markdown, or switch to JSON for automation.
+4. Fail CI only at the severity level you care about.
 
-## Expected Result
+## Checks
+
+| Rule | Severity | What it catches |
+| --- | --- | --- |
+| `latest-tag` | high | base image uses latest tag |
+| `root-user` | medium | container runs as root |
+| `unpinned-pip` | low | pip dependency may be unpinned |
+
+## Command line
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -18,30 +29,19 @@ dockerfile-risk-scan examples/sample.txt
 dockerfile-risk-scan examples/sample.txt --json --fail-on medium
 ```
 
-## Troubleshooting
-
-| Rule | Severity | Meaning |
-|---|---:|---|
-| `latest-tag` | high | base image uses latest tag |
-| `root-user` | medium | container runs as root |
-| `unpinned-pip` | low | pip dependency may be unpinned |
-
-## Ownership
-
-```bash
-ruff check .
-pytest
-python -m dockerfile_risk_scan --help
-```
-
-License: MIT
-
-### Example Input
+## Sample risky input
 
 ```text
 FROM python:latest RUN pip install flask USER root
 ```
 
-### Architecture
+## Project shape
 
-`cli.py` reads files, `core.py` evaluates records, and `rules.py` keeps the dockerfile-risk-scan policy surface explicit.
+```text
+.github/        CI workflow
+examples/       sample inputs
+src/            package source
+tests/          test coverage
+.gitignore      project file
+pyproject.toml  package metadata
+```
