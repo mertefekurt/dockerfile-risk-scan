@@ -1,40 +1,33 @@
 # Dockerfile Risk Scan
 
-Scan Dockerfile snippets for root users, latest tags, and unpinned installs. In practice it is a narrow guardrail for deployment, cloud, CI, config, and operational safety checks: one command, a concrete report, and very little ceremony.
+![Dockerfile Risk Scan cover](assets/readme-cover.svg)
 
-<img src="assets/readme-cover.svg" alt="Dockerfile Risk Scan cover" width="100%" />
+This repository turns a tiny plain text into reviewable signals for container review.
 
-## Review checklist
+## How the check reads
 
-- [ ] base image uses latest tag (`latest-tag`, high)
-- [ ] container runs as root (`root-user`, medium)
-- [ ] pip dependency may be unpinned (`unpinned-pip`, low)
+![Rule flow](assets/readme-diagram.svg)
 
-## Command path
+## Checks in plain language
+
+| Signal | Level | What it flags | Fix direction |
+| --- | --- | --- | --- |
+| `latest-tag` | high | base image uses latest tag | Pin base image version or digest. |
+| `root-user` | medium | container runs as root | Use a non-root runtime user. |
+| `unpinned-pip` | low | pip dependency may be unpinned | Pin runtime dependencies or use a lockfile. |
+
+## Fresh clone path
 
 ```bash
 git clone https://github.com/mertefekurt/dockerfile-risk-scan.git
 cd dockerfile-risk-scan
-python -m venv .venv
-source .venv/bin/activate
 python -m pip install -e ".[dev]"
 dockerfile-risk-scan examples/sample.txt
-dockerfile-risk-scan examples/sample.txt --json
 ```
 
-## Fixture worth keeping
+## Example lines
 
 ```text
-FROM python:latest RUN pip install flask USER root
-```
-
-## Files I look at first
-
-```text
-.github/        CI workflow
-examples/       sample inputs
-src/            package source
-tests/          test coverage
-.gitignore      project file
-pyproject.toml  package metadata
+risky: FROM python:latest RUN pip install flask USER root
+clean: FROM python:3.11-slim RUN pip install flask==3.0.0 USER app
 ```
